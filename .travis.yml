@@ -12,13 +12,10 @@ sudo: false
 rvm:
   - 2.3.0
   - 2.2.4
-  - 2.1.8
 gemfile:
   - gemfiles/rails40.gemfile
   - gemfiles/rails41.gemfile
   - gemfiles/rails42.gemfile
-  - gemfiles/rails50.gemfile
-matrix:
-  exclude:
-    - rvm: 2.1.8
-      gemfile: gemfiles/rails50.gemfile
+install: bundle install --deployment
+before_script: bundle exec rake dummy:db:create
+script: bundle exec rake
