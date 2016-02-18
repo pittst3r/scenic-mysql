@@ -4,12 +4,12 @@ require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
 
 task :smoke do
-    exec "spec/smoke"
+  exec "spec/smoke"
 end
 
 namespace :dummy do
-    require_relative "spec/dummy/config/application"
-      Dummy::Application.load_tasks
+  require_relative "spec/dummy/config/application"
+  Dummy::Application.load_tasks
 end
 
 task(:spec).clear
@@ -18,3 +18,5 @@ RSpec::Core::RakeTask.new("spec") do |task|
   task.exclude_pattern = "spec/acceptance/**/*_spec.rb"
   task.verbose = false
 end
+
+task default: [:spec]
