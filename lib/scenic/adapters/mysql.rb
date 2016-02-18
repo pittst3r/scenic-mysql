@@ -92,95 +92,6 @@ module Scenic
         execute "DROP VIEW #{quote_table_name(name)};"
       end
 
-      # Creates a materialized view in the database
-      #
-      # @param name The name of the materialized view to create
-      # @param sql_definition The SQL schema that defines the materialized view.
-      #
-      # This is typically called in a migration via {Statements#create_view}.
-      #
-      # @raise [MaterializedViewsNotSupportedError] if the version of Postgres
-      #   in use does not support materialized views.
-      #
-      # @return [void]
-      def create_materialized_view(name, sql_definition)
-        raise_unless_materialized_views_supported
-        execute "CREATE MATERIALIZED VIEW #{quote_table_name(name)} AS #{sql_definition};"
-      end
-
-      # Updates a materialized view in the database.
-      #
-      # Drops and recreates the materialized view. Attempts to maintain all
-      # previously existing and still applicable indexes on the materialized
-      # view after the view is recreated.
-      #
-      # This is typically called in a migration via {Statements#update_view}.
-      #
-      # @param name The name of the view to update
-      # @param sql_definition The SQL schema for the updated view.
-      #
-      # @raise [MaterializedViewsNotSupportedError] if the version of Postgres
-      #   in use does not support materialized views.
-      #
-      # @return [void]
-      def update_materialized_view(name, sql_definition)
-        raise_unless_materialized_views_supported
-
-        IndexReapplication.new(connection: connection).on(name) do
-          drop_materialized_view(name)
-          create_materialized_view(name, sql_definition)
-        end
-      end
-
-      # Drops a materialized view in the database
-      #
-      # This is typically called in a migration via {Statements#update_view}.
-      #
-      # @param name The name of the materialized view to drop.
-      # @raise [MaterializedViewsNotSupportedError] if the version of Postgres
-      #   in use does not support materialized views.
-      #
-      # @return [void]
-      def drop_materialized_view(name)
-        raise_unless_materialized_views_supported
-        execute "DROP MATERIALIZED VIEW #{quote_table_name(name)};"
-      end
-
-      # Refreshes a materialized view from its SQL schema.
-      #
-      # This is typically called from application code via {Scenic.database}.
-      #
-      # @param name The name of the materialized view to refresh.
-      # @param concurrently [Boolean] Whether the refreshs hould happen
-      #   concurrently or not. A concurrent refresh allows the view to be
-      #   refreshed without locking the view for select but requires that the
-      #   table have at least one unique index that covers all rows. Attempts to
-      #   refresh concurrently without a unique index will raise a descriptive
-      #   error.
-      #
-      # @raise [MaterializedViewsNotSupportedError] if the version of Postgres
-      #   in use does not support materialized views.
-      # @raise [ConcurrentRefreshesNotSupportedError] when attempting a
-      #   concurrent refresh on version of Postgres that does not support
-      #   concurrent materialized view refreshes.
-      #
-      # @example Non-concurrent refresh
-      #   Scenic.database.refresh_materialized_view(:search_results)
-      # @example Concurrent refresh
-      #   Scenic.database.refresh_materialized_view(:posts, concurrent: true)
-      #
-      # @return [void]
-      def refresh_materialized_view(name, concurrently: false)
-        raise_unless_materialized_views_supported
-
-        if concurrently
-          raise_unless_concurrent_refresh_supported
-          execute "REFRESH MATERIALIZED VIEW CONCURRENTLY #{quote_table_name(name)};"
-        else
-          execute "REFRESH MATERIALIZED VIEW #{quote_table_name(name)};"
-        end
-      end
-
       private
 
       attr_reader :connectable
@@ -188,18 +99,6 @@ module Scenic
 
       def connection
         Connection.new(connectable.connection)
-      end
-
-      def raise_unless_materialized_views_supported
-        unless connection.supports_materialized_views?
-          raise MaterializedViewsNotSupportedError
-        end
-      end
-
-      def raise_unless_concurrent_refresh_supported
-        unless connection.supports_concurrent_refreshes?
-          raise ConcurrentRefreshesNotSupportedError
-        end
       end
     end
   end

@@ -45,7 +45,7 @@ module Scenic
           Scenic::View.new(
             name: result[:name],
             definition: result[:definition].strip,
-            materialized: false,
+            materialized: false
           )
         end
 

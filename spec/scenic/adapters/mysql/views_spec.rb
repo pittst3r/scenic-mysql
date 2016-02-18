@@ -6,7 +6,7 @@ module Scenic
       it "returns scenic view objects for plain old views" do
         connection = ActiveRecord::Base.connection
         connection.execute <<-SQL
-          CREATE VIEW children AS SELECT text 'Elliot' AS name
+          CREATE VIEW children AS SELECT 'Elliot' AS name
         SQL
 
         views = described_class.new(connection).all
@@ -15,22 +15,11 @@ module Scenic
         expect(views.size).to eq 1
         expect(first.name).to eq "children"
         expect(first.materialized).to be false
-        expect(first.definition).to eq "SELECT 'Elliot'::text AS name;"
-      end
+        expect(first.definition).to match /select 'Elliot' AS `name`/
 
-      it "returns scenic view objects for materialized views" do
-        connection = ActiveRecord::Base.connection
         connection.execute <<-SQL
-          CREATE MATERIALIZED VIEW children AS SELECT text 'Owen' AS name
+          DROP VIEW children
         SQL
-
-        views = described_class.new(connection).all
-        first = views.first
-
-        expect(views.size).to eq 1
-        expect(first.name).to eq "children"
-        expect(first.materialized).to be true
-        expect(first.definition).to eq "SELECT 'Owen'::text AS name;"
       end
     end
   end

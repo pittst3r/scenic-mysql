@@ -17,41 +17,7 @@ module Scenic
         #
         # @return [Boolean]
         def supports_materialized_views?
-          if undecorated_connection.respond_to?(:supports_materialized_views?)
-            super
-          else
-            true
-            # postgresql_version >= 90300
-          end
-        end
-
-        # True if the connection supports concurrent refreshes of materialized
-        # views.
-        #
-        # @return [Boolean]
-        def supports_concurrent_refreshes?
-          true
-          # postgresql_version >= 90400
-        end
-
-        # An integer representing the version of Postgres we're connected to.
-        #
-        # postgresql_version is public in Rails 5, but protected in earlier
-        # versions.
-        #
-        # @return [Integer]
-        def postgresql_version
-          if undecorated_connection.respond_to?(:mysql_version)
-            super
-          else
-            undecorated_connection.send(:mysql_version)
-          end
-        end
-
-        private
-
-        def undecorated_connection
-          __getobj__
+          false
         end
       end
     end
