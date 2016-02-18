@@ -1,16 +1,8 @@
 addons:
-  mysql: "5.7"
   mysql: "5.6"
-before_install:
-  - "echo '--colour' > ~/.rspec"
-  - "echo 'gem: --no-document' > ~/.gemrc"
-  - git config --global user.name 'Travis CI'
-  - git config --global user.email 'travis-ci@example.com'
 branches:
   only:
     - master
-install:
-  - travis_retry bin/setup
 language:
   - ruby
 notifications:
