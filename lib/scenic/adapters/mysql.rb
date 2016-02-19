@@ -1,7 +1,5 @@
 require_relative "mysql/connection"
 require_relative "mysql/errors"
-require_relative "mysql/index_reapplication"
-require_relative "mysql/indexes"
 require_relative "mysql/views"
 
 module Scenic
@@ -57,7 +55,10 @@ module Scenic
       #
       # @return [void]
       def create_view(name, sql_definition)
-        execute "CREATE VIEW #{quote_table_name(name)} AS #{sql_definition};"
+        execute(<<-SQL)
+          CREATE ALGORITHM = MERGE DEFINER = CURRENT_USER
+            VIEW #{quote_table_name(name)} AS #{sql_definition};
+        SQL
       end
 
       # Updates a view in the database.
